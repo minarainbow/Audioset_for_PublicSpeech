@@ -12,7 +12,7 @@ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $B
 bash $BIN_DIR/Miniconda3-latest-Linux-x86_64.sh -p $CONDA_DIR -b
 
 # Install ffmpeg (with OpenSSL support)
-wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz
 tar xf ffmpeg-release-64bit-static.tar.xz
 mv ffmpeg-3.3.4-64bit-static $BIN_DIR/ffmpeg
 

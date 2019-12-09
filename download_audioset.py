@@ -19,6 +19,7 @@ from functools import partial
 import multiprocessing_logging
 import pafy
 
+
 from errors import SubprocessError, FfmpegValidationError, \
                    FfmpegIncorrectDurationError, FfmpegUnopenableFileError
 from log import init_file_logger, init_console_logger
@@ -50,7 +51,7 @@ def parse_arguments():
                         dest='ffmpeg_path',
                         action='store',
                         type=str,
-                        default='./bin/ffmpeg/ffmpeg',
+                        default='/usr/local/bin/ffmpeg',
                         help='Path to ffmpeg executable')
 
     parser.add_argument('-fp',
@@ -58,7 +59,7 @@ def parse_arguments():
                         dest='ffprobe_path',
                         action='store',
                         type=str,
-                        default='./bin/ffmpeg/ffprobe',
+                        default='/usr/local/bin/ffprobe',
                         help='Path to ffprobe executable')
 
     parser.add_argument('-e',
@@ -664,6 +665,7 @@ def download_subset_videos(subset_path, data_dir, ffmpeg_path, ffprobe_path,
                     continue
                 ytid, ts_start, ts_end = row[0], float(row[1]), float(row[2])
 
+
                 # Skip files that already have been downloaded
                 media_filename = get_media_filename(ytid, ts_start, ts_end)
                 video_filepath = os.path.join(data_dir, 'video', media_filename + '.' + ffmpeg_cfg.get('video_format', 'mp4'))
@@ -672,7 +674,15 @@ def download_subset_videos(subset_path, data_dir, ffmpeg_path, ffprobe_path,
                     info_msg = 'Already downloaded video {} ({} - {}). Skipping.'
                     LOGGER.info(info_msg.format(ytid, ts_start, ts_end))
                     continue
-
+                
+                # Skip files that are neither Applause nor Speech
+                with open('filemove/both_id.txt', 'r+') as f:
+                        if ytid in f.read():
+                            print("downloaded sth meaningful!" + ytid)
+                        else:
+                            # print("skip" + ytid)
+                            continue
+                        
                 worker_args = [ytid, ts_start, ts_end, data_dir, ffmpeg_path, ffprobe_path]
                 pool.apply_async(partial(segment_mp_worker, **ffmpeg_cfg), worker_args)
                 # Run serially
@@ -885,10 +895,10 @@ def download_audioset(data_dir, ffmpeg_path, ffprobe_path, eval_segments_path,
     multiprocessing_logging.install_mp_handler()
     LOGGER.debug('Initialized logging.')
 
-    download_subset(eval_segments_path, data_dir, ffmpeg_path, ffprobe_path,
-                    num_workers, **ffmpeg_cfg)
-    download_subset(balanced_train_segments_path, data_dir, ffmpeg_path, ffprobe_path,
-                    num_workers, **ffmpeg_cfg)
+    # download_subset(eval_segments_path, data_dir, ffmpeg_path, ffprobe_path,
+    #                 num_workers, **ffmpeg_cfg)
+    # download_subset(balanced_train_segments_path, data_dir, ffmpeg_path, ffprobe_path,
+    #                 num_workers, **ffmpeg_cfg)
     download_subset(unbalanced_train_segments_path, data_dir, ffmpeg_path, ffprobe_path,
                     num_workers, **ffmpeg_cfg)
 
